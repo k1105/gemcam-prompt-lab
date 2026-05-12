@@ -27,6 +27,7 @@ export default function Home() {
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("9:16");
+  const [cameraReady, setCameraReady] = useState(false);
 
   const [filters, setFilters] = useState<PromptFilter[]>([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
@@ -128,9 +129,15 @@ export default function Home() {
     }
   }, [phase, updateVideoDevices]);
 
+  const handleCameraStart = useCallback(() => {
+    setCameraReady(true);
+    updateVideoDevices();
+  }, [updateVideoDevices]);
+
   const handleFlipCamera = useCallback(() => {
+    setCameraReady(false);
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
+
     if (isMobile) {
       // On smartphones, cycling through all 5+ lenses is frustrating.
       // Toggling facingMode tells the OS to switch between front and back naturally.
@@ -186,7 +193,7 @@ export default function Home() {
             facingMode={facingMode}
             deviceId={deviceId}
             aspectRatio={aspectRatio}
-            onCameraStart={updateVideoDevices}
+            onCameraStart={handleCameraStart}
           />
         )}
         {phase === "processing" && capturedDataUrl && (
@@ -219,6 +226,7 @@ export default function Home() {
             onShutter={handleShutter}
             onFlipCamera={handleFlipCamera}
             disabled={!selectedFilter || phase !== "camera"}
+            flipDisabled={!cameraReady}
           />
         </>
       )}

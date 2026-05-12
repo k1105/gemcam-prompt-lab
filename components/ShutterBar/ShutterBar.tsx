@@ -7,14 +7,21 @@ type Props = {
   onShutter: () => void;
   onFlipCamera: () => void;
   disabled?: boolean;
+  flipDisabled?: boolean;
 };
 
-export function ShutterBar({ onShutter, onFlipCamera, disabled }: Props) {
+export function ShutterBar({
+  onShutter,
+  onFlipCamera,
+  disabled,
+  flipDisabled,
+}: Props) {
   return (
     <div className={styles.bar}>
       <button
         className={styles.iconBtn}
         onClick={onFlipCamera}
+        disabled={flipDisabled}
         aria-label="Flip camera"
       >
         <Icon icon="material-symbols:cameraswitch-outline" width={22} />

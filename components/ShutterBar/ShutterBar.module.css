@@ -26,6 +26,12 @@
   box-shadow: 1px 1px 0 var(--color-ink);
 }
 
+.iconBtn:disabled {
+  opacity: 0.5;
+  box-shadow: 1px 1px 0 var(--color-ink);
+  cursor: not-allowed;
+}
+
 .shutter {
   position: relative;
   width: 78px;

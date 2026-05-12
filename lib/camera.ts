@@ -13,15 +13,29 @@ export async function startCamera(
   deviceId?: string | null,
   facingMode: FacingMode = "environment",
 ): Promise<MediaStream> {
-  const videoConstraints: MediaTrackConstraints = deviceId
-    ? { deviceId: { exact: deviceId } }
-    : { facingMode: { ideal: facingMode } };
+  if (deviceId) {
+    return navigator.mediaDevices.getUserMedia({
+      video: { deviceId: { exact: deviceId } },
+      audio: false,
+    });
+  }
 
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: videoConstraints,
-    audio: false,
-  });
-  return stream;
+  // `exact` forces the OS to honor the requested facing direction.
+  // Some browsers silently ignore `ideal`, leaving the camera unchanged on flip.
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: facingMode } },
+      audio: false,
+    });
+  } catch (err) {
+    if ((err as Error)?.name === "OverconstrainedError") {
+      return navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: facingMode } },
+        audio: false,
+      });
+    }
+    throw err;
+  }
 }
 
 export function stopCamera(

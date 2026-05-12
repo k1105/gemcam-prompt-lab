@@ -32,6 +32,12 @@ export const CameraView = forwardRef<HTMLVideoElement, Props>(
 
       (async () => {
         try {
+          // iOS Safari releases the camera hardware asynchronously after track.stop().
+          // A short delay lets the previous stream fully release before re-acquiring,
+          // preventing NotReadableError / black-screen on rapid facingMode flips.
+          await new Promise((r) => setTimeout(r, 80));
+          if (cancelled) return;
+
           stream = await startCamera(deviceId, facingMode);
           if (cancelled) {
             stopCamera(stream);
@@ -39,7 +45,7 @@ export const CameraView = forwardRef<HTMLVideoElement, Props>(
           }
           video.srcObject = stream;
           await video.play();
-          
+
           if (onCameraStart) {
             onCameraStart();
           }
