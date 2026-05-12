@@ -129,17 +129,26 @@ export default function Home() {
   }, [phase, updateVideoDevices]);
 
   const handleFlipCamera = useCallback(() => {
-    if (videoDevices.length > 1) {
-      setDeviceId((current) => {
-        // If current is null, try to find the index of the default or first device
-        const currentIndex = current
-          ? videoDevices.findIndex((d) => d.deviceId === current)
-          : 0;
-        const nextIndex = (Math.max(0, currentIndex) + 1) % videoDevices.length;
-        return videoDevices[nextIndex].deviceId;
-      });
-    } else {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // On smartphones, cycling through all 5+ lenses is frustrating.
+      // Toggling facingMode tells the OS to switch between front and back naturally.
+      setDeviceId(null);
       setFacingMode((m) => (m === "user" ? "environment" : "user"));
+    } else {
+      // On desktop, facingMode is often ignored, so we cycle through available webcams.
+      if (videoDevices.length > 1) {
+        setDeviceId((current) => {
+          const currentIndex = current
+            ? videoDevices.findIndex((d) => d.deviceId === current)
+            : 0;
+          const nextIndex = (Math.max(0, currentIndex) + 1) % videoDevices.length;
+          return videoDevices[nextIndex].deviceId;
+        });
+      } else {
+        setFacingMode((m) => (m === "user" ? "environment" : "user"));
+      }
     }
   }, [videoDevices]);
 
@@ -171,13 +180,15 @@ export default function Home() {
         <AspectRatioSelector value={aspectRatio} onChange={setAspectRatio} />
       )}
       <div className={styles.body}>
-        <CameraView
-          ref={videoRef}
-          facingMode={facingMode}
-          deviceId={deviceId}
-          aspectRatio={aspectRatio}
-          onCameraStart={updateVideoDevices}
-        />
+        {phase === "camera" && (
+          <CameraView
+            ref={videoRef}
+            facingMode={facingMode}
+            deviceId={deviceId}
+            aspectRatio={aspectRatio}
+            onCameraStart={updateVideoDevices}
+          />
+        )}
         {phase === "processing" && capturedDataUrl && (
           <ProcessingScreen
             imageDataUrl={capturedDataUrl}

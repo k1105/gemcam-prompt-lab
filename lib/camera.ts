@@ -59,11 +59,17 @@ export function captureFrame(
     sy = (vh - sh) / 2;
   }
 
+  // Downscale to prevent mobile memory crashes (max dim ~1200px)
+  const MAX_DIM = 1200;
+  const scale = Math.min(1, MAX_DIM / Math.max(sw, sh));
+  const finalW = Math.round(sw * scale);
+  const finalH = Math.round(sh * scale);
+
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(sw);
-  canvas.height = Math.round(sh);
+  canvas.width = finalW;
+  canvas.height = finalH;
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, finalW, finalH);
   return canvas.toDataURL("image/jpeg", 0.9);
 }
 
