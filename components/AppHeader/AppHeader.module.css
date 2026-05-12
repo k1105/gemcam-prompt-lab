@@ -1,0 +1,68 @@
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 14px;
+  background: var(--color-yellow);
+  border-bottom: var(--border-thick);
+  z-index: 5;
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--color-ink);
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+.logoMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--color-red);
+  color: var(--color-white);
+  font-size: 11px;
+  font-weight: 900;
+  border-radius: 4px;
+}
+
+.logoTag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: var(--color-white);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1.5px solid var(--color-ink);
+  letter-spacing: 0.08em;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-white);
+  border: var(--border-thin);
+  border-radius: 999px;
+  color: var(--color-ink);
+}
+
+.iconBtn:active {
+  transform: translateY(1px);
+}

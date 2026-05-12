@@ -1,0 +1,35 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--color-ink);
+  color: var(--color-yellow);
+  border-bottom: var(--border-thick);
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--color-yellow);
+  margin-right: 4px;
+}
+
+.option {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: transparent;
+  color: var(--color-paper);
+  border: 1.5px solid var(--color-paper);
+  border-radius: 999px;
+}
+
+.optionActive {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+  border-color: var(--color-yellow);
+}

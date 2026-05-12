@@ -1,0 +1,118 @@
+:root {
+  /* Kodak-inspired palette */
+  --color-yellow: #ffd200;
+  --color-yellow-deep: #f5b400;
+  --color-red: #e4002b;
+  --color-bg: #faf7f0;
+  --color-paper: #f1ecde;
+  --color-ink: #1a1a1a;
+  --color-ink-soft: #2b2b2b;
+  --color-ink-mute: #707070;
+  --color-line: #1a1a1a;
+  --color-white: #ffffff;
+  --color-shadow: rgba(26, 26, 26, 0.12);
+
+  /* Typography */
+  --font-display: "Helvetica Neue", "Helvetica", "Arial Black", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica,
+    Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Spacing & radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  /* Strokes */
+  --border-thick: 3px solid var(--color-ink);
+  --border-thin: 1.5px solid var(--color-ink);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  overflow: hidden;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Reusable utility — Kodak-style chunky pill button */
+.kodak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  padding: 10px 16px;
+  background: var(--color-yellow);
+  color: var(--color-ink);
+  border: var(--border-thick);
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 13px;
+  box-shadow: 3px 3px 0 var(--color-ink);
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+
+.kodak-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+
+.kodak-btn--ghost {
+  background: var(--color-white);
+}
+
+.kodak-btn--danger {
+  background: var(--color-red);
+  color: var(--color-white);
+}
+
+/* Film-perforation strip (used as decorative border) */
+.film-strip {
+  --hole: 14px;
+  --gap: 22px;
+  background-color: var(--color-ink);
+  background-image: radial-gradient(
+    circle at center,
+    var(--color-bg) calc(var(--hole) / 2),
+    transparent calc(var(--hole) / 2 + 1px)
+  );
+  background-size: var(--gap) var(--gap);
+  background-position: center;
+}
