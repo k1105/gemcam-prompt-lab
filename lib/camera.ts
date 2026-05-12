@@ -32,7 +32,7 @@ export function stopCamera(
   video?: HTMLVideoElement | null,
 ): void {
   stream.getTracks().forEach((track) => track.stop());
-  if (video) {
+  if (video && video.srcObject === stream) {
     video.srcObject = null;
   }
 }

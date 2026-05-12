@@ -167,7 +167,9 @@ export default function Home() {
   return (
     <main className={styles.app}>
       <AppHeader />
-      <AspectRatioSelector value={aspectRatio} onChange={setAspectRatio} />
+      {phase === "camera" && (
+        <AspectRatioSelector value={aspectRatio} onChange={setAspectRatio} />
+      )}
       <div className={styles.body}>
         <CameraView
           ref={videoRef}
@@ -192,19 +194,23 @@ export default function Home() {
           />
         )}
       </div>
-      <FilterStrip
-        filters={filters}
-        selectedId={selectedFilterId}
-        onSelect={setSelectedFilterId}
-        onAdd={() => setModalOpen(true)}
-        onEdit={(id) => setEditingFilterId(id)}
-        loading={filtersLoading}
-      />
-      <ShutterBar
-        onShutter={handleShutter}
-        onFlipCamera={handleFlipCamera}
-        disabled={!selectedFilter || phase !== "camera"}
-      />
+      {phase === "camera" && (
+        <>
+          <FilterStrip
+            filters={filters}
+            selectedId={selectedFilterId}
+            onSelect={setSelectedFilterId}
+            onAdd={() => setModalOpen(true)}
+            onEdit={(id) => setEditingFilterId(id)}
+            loading={filtersLoading}
+          />
+          <ShutterBar
+            onShutter={handleShutter}
+            onFlipCamera={handleFlipCamera}
+            disabled={!selectedFilter || phase !== "camera"}
+          />
+        </>
+      )}
       <FilterCreateModal
         open={modalOpen || !!editingFilterId}
         onClose={() => {
