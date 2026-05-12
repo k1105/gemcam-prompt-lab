@@ -15,10 +15,11 @@ type Props = {
   deviceId?: string | null;
   aspectRatio: AspectRatio;
   onCameraStart?: () => void;
+  countdown?: number | null;
 };
 
 export const CameraView = forwardRef<HTMLVideoElement, Props>(
-  function CameraView({ facingMode, deviceId, aspectRatio, onCameraStart }, ref) {
+  function CameraView({ facingMode, deviceId, aspectRatio, onCameraStart, countdown }, ref) {
     const [error, setError] = useState<string | null>(null);
     const [frameSize, setFrameSize] = useState<{ w: number; h: number } | null>(
       null,
@@ -106,6 +107,11 @@ export const CameraView = forwardRef<HTMLVideoElement, Props>(
           <span className={`${styles.cornerMark} ${styles.tr}`} />
           <span className={`${styles.cornerMark} ${styles.bl}`} />
           <span className={`${styles.cornerMark} ${styles.br}`} />
+          {countdown != null && countdown > 0 && (
+            <div key={countdown} className={styles.countdown}>
+              {countdown}
+            </div>
+          )}
         </div>
         {error && <div className={styles.errorBanner}>{error}</div>}
       </div>

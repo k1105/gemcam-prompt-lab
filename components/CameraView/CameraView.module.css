@@ -69,3 +69,38 @@
   font-size: 13px;
   line-height: 1.4;
 }
+
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(120px, 36vw, 240px);
+  color: var(--color-yellow);
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.6),
+    6px 6px 0 var(--color-ink);
+  pointer-events: none;
+  animation: countdownPop 1s ease-out forwards;
+}
+
+@keyframes countdownPop {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}

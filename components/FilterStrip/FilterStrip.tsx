@@ -36,7 +36,7 @@ export function FilterStrip({
       )}
       {filters.map((f) => {
         const active = f.id === selectedId;
-        const thumb = f.referenceImages[0];
+        const thumbSrc = f.thumbnailUrl ?? f.referenceImages[0]?.url ?? null;
         return (
           <div
             key={f.id}
@@ -65,9 +65,9 @@ export function FilterStrip({
               </button>
             )}
             <div className={styles.thumb}>
-              {thumb ? (
+              {thumbSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={thumb.url} alt={f.name} />
+                <img src={thumbSrc} alt={f.name} />
               ) : (
                 <div className={styles.thumbEmpty}>NO REF</div>
               )}

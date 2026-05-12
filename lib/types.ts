@@ -10,6 +10,7 @@ export type PromptFilter = {
   name: string;
   prompt: string;
   referenceImages: ReferenceImage[];
+  thumbnailUrl?: string;
   createdBy?: string;
   createdAt: number;
   updatedAt: number;

@@ -6,6 +6,7 @@ type DocData = {
   name: string;
   prompt: string;
   referenceImages: ReferenceImage[];
+  thumbnailUrl?: string | null;
   createdBy?: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -17,6 +18,7 @@ function docToFilter(id: string, data: DocData): PromptFilter {
     name: data.name,
     prompt: data.prompt,
     referenceImages: data.referenceImages ?? [],
+    thumbnailUrl: data.thumbnailUrl ?? undefined,
     createdBy: data.createdBy ?? undefined,
     createdAt: data.createdAt.toMillis(),
     updatedAt: data.updatedAt.toMillis(),
@@ -69,21 +71,23 @@ export async function updateFilter(
     name: string;
     prompt: string;
     referenceImages: ReferenceImage[];
+    thumbnailUrl: string | null;
     createdBy: string | null;
   }>
 ): Promise<PromptFilter | null> {
   const db = getDb();
   const ref = db.collection(FILTERS_COLLECTION).doc(id);
-  
+
   const updates: Record<string, any> = {
     updatedAt: FieldValue.serverTimestamp(),
   };
-  
+
   if (input.name !== undefined) updates.name = input.name;
   if (input.prompt !== undefined) updates.prompt = input.prompt;
   if (input.referenceImages !== undefined) updates.referenceImages = input.referenceImages;
+  if (input.thumbnailUrl !== undefined) updates.thumbnailUrl = input.thumbnailUrl;
   if (input.createdBy !== undefined) updates.createdBy = input.createdBy;
-  
+
   await ref.update(updates);
   return getFilter(id);
 }

@@ -6,6 +6,7 @@ import { AspectRatioSelector } from "@/components/AspectRatioSelector/AspectRati
 import { CameraView } from "@/components/CameraView/CameraView";
 import { FilterCreateModal } from "@/components/FilterCreateModal/FilterCreateModal";
 import { FilterStrip } from "@/components/FilterStrip/FilterStrip";
+import { FilterToast } from "@/components/FilterToast/FilterToast";
 import { ProcessingScreen } from "@/components/ProcessingScreen/ProcessingScreen";
 import { ResultScreen } from "@/components/ResultScreen/ResultScreen";
 import { ShutterBar } from "@/components/ShutterBar/ShutterBar";
@@ -38,6 +39,11 @@ export default function Home() {
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
   const [resultDataUrl, setResultDataUrl] = useState<string | null>(null);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [filterToast, setFilterToast] = useState<{
+    name: string;
+    key: number;
+  } | null>(null);
 
   const selectedFilter =
     filters.find((f) => f.id === selectedFilterId) ?? null;
@@ -70,6 +76,13 @@ export default function Home() {
   const handleShutter = useCallback(async () => {
     const video = videoRef.current;
     if (!video || !selectedFilter) return;
+
+    for (let n = 3; n >= 1; n--) {
+      setCountdown(n);
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    setCountdown(null);
+
     const dataUrl = captureFrame(video, aspectRatio);
     setCapturedDataUrl(dataUrl);
     setResultDataUrl(null);
@@ -99,12 +112,46 @@ export default function Home() {
     }
   }, [aspectRatio, selectedFilter]);
 
+  const handleSelectFilter = useCallback(
+    (id: string) => {
+      setSelectedFilterId(id);
+      const filter = filters.find((f) => f.id === id);
+      if (filter) {
+        setFilterToast({ name: filter.name, key: Date.now() });
+      }
+    },
+    [filters],
+  );
+
+  useEffect(() => {
+    if (!filterToast) return;
+    const t = setTimeout(() => setFilterToast(null), 1400);
+    return () => clearTimeout(t);
+  }, [filterToast]);
+
   const handleRetake = useCallback(() => {
     setCapturedDataUrl(null);
     setResultDataUrl(null);
     setGenerateError(null);
     setPhase("camera");
   }, []);
+
+  const handleSetAsThumbnail = useCallback(async () => {
+    if (!selectedFilter || !resultDataUrl) return;
+    const res = await fetch(`/api/filters/${selectedFilter.id}/thumbnail`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageDataUrl: resultDataUrl }),
+    });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error(json.error ?? "failed to set thumbnail");
+    }
+    const json = (await res.json()) as { filter: PromptFilter };
+    setFilters((prev) =>
+      prev.map((f) => (f.id === json.filter.id ? json.filter : f)),
+    );
+  }, [resultDataUrl, selectedFilter]);
 
   const updateVideoDevices = useCallback(async () => {
     try {
@@ -194,6 +241,7 @@ export default function Home() {
             deviceId={deviceId}
             aspectRatio={aspectRatio}
             onCameraStart={handleCameraStart}
+            countdown={countdown}
           />
         )}
         {phase === "processing" && capturedDataUrl && (
@@ -209,7 +257,11 @@ export default function Home() {
             error={generateError}
             onRetake={handleRetake}
             onClose={handleRetake}
+            onSetAsThumbnail={handleSetAsThumbnail}
           />
+        )}
+        {phase === "camera" && filterToast && (
+          <FilterToast name={filterToast.name} triggerKey={filterToast.key} />
         )}
       </div>
       {phase === "camera" && (
@@ -217,7 +269,7 @@ export default function Home() {
           <FilterStrip
             filters={filters}
             selectedId={selectedFilterId}
-            onSelect={setSelectedFilterId}
+            onSelect={handleSelectFilter}
             onAdd={() => setModalOpen(true)}
             onEdit={(id) => setEditingFilterId(id)}
             loading={filtersLoading}
@@ -225,8 +277,8 @@ export default function Home() {
           <ShutterBar
             onShutter={handleShutter}
             onFlipCamera={handleFlipCamera}
-            disabled={!selectedFilter || phase !== "camera"}
-            flipDisabled={!cameraReady}
+            disabled={!selectedFilter || phase !== "camera" || countdown != null}
+            flipDisabled={!cameraReady || countdown != null}
           />
         </>
       )}
