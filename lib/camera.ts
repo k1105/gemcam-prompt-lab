@@ -10,20 +10,17 @@ export function aspectRatioToNumber(ratio: AspectRatio): number {
 }
 
 export async function startCamera(
-  video: HTMLVideoElement,
   deviceId?: string | null,
   facingMode: FacingMode = "environment",
 ): Promise<MediaStream> {
   const videoConstraints: MediaTrackConstraints = deviceId
     ? { deviceId: { exact: deviceId } }
-    : { facingMode };
+    : { facingMode: { ideal: facingMode } };
 
   const stream = await navigator.mediaDevices.getUserMedia({
     video: videoConstraints,
     audio: false,
   });
-  video.srcObject = stream;
-  await video.play();
   return stream;
 }
 

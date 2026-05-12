@@ -32,15 +32,23 @@ export const CameraView = forwardRef<HTMLVideoElement, Props>(
 
       (async () => {
         try {
-          stream = await startCamera(video, deviceId, facingMode);
-          if (cancelled && stream) stopCamera(stream, video);
-          if (!cancelled && stream && onCameraStart) {
+          stream = await startCamera(deviceId, facingMode);
+          if (cancelled) {
+            stopCamera(stream);
+            return;
+          }
+          video.srcObject = stream;
+          await video.play();
+          
+          if (onCameraStart) {
             onCameraStart();
           }
         } catch (err) {
-          const message =
-            err instanceof Error ? err.message : "カメラを起動できません";
-          setError(message);
+          if (!cancelled) {
+            const message =
+              err instanceof Error ? err.message : "カメラを起動できません";
+            setError(message);
+          }
         }
       })();
 
@@ -73,24 +81,26 @@ export const CameraView = forwardRef<HTMLVideoElement, Props>(
 
     return (
       <div id="camera-stage" className={styles.stage}>
-        {frameSize && (
-          <div
-            className={styles.frame}
-            style={{ width: frameSize.w, height: frameSize.h }}
-          >
-            <video
-              ref={ref}
-              className={styles.video}
-              playsInline
-              muted
-              autoPlay
-            />
-            <span className={`${styles.cornerMark} ${styles.tl}`} />
-            <span className={`${styles.cornerMark} ${styles.tr}`} />
-            <span className={`${styles.cornerMark} ${styles.bl}`} />
-            <span className={`${styles.cornerMark} ${styles.br}`} />
-          </div>
-        )}
+        <div
+          className={styles.frame}
+          style={
+            frameSize
+              ? { width: frameSize.w, height: frameSize.h }
+              : { width: "100%", height: "100%", visibility: "hidden" }
+          }
+        >
+          <video
+            ref={ref}
+            className={styles.video}
+            playsInline
+            muted
+            autoPlay
+          />
+          <span className={`${styles.cornerMark} ${styles.tl}`} />
+          <span className={`${styles.cornerMark} ${styles.tr}`} />
+          <span className={`${styles.cornerMark} ${styles.bl}`} />
+          <span className={`${styles.cornerMark} ${styles.br}`} />
+        </div>
         {error && <div className={styles.errorBanner}>{error}</div>}
       </div>
     );
