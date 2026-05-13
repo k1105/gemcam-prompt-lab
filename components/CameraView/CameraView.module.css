@@ -25,6 +25,10 @@
   display: block;
 }
 
+.video.mirrored {
+  transform: scaleX(-1);
+}
+
 .cornerMark {
   position: absolute;
   width: 18px;

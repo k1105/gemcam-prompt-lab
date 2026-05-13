@@ -25,11 +25,25 @@ export function ResultScreen({
 }: Props) {
   const [thumbState, setThumbState] = useState<ThumbState>("idle");
 
-  function download() {
+  async function save() {
     if (!imageDataUrl) return;
+    const filename = `gemcam-${Date.now()}.jpg`;
+    try {
+      const blob = await (await fetch(imageDataUrl)).blob();
+      const file = new File([blob], filename, { type: blob.type });
+      if (
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({ files: [file] });
+        return;
+      }
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return;
+    }
     const a = document.createElement("a");
     a.href = imageDataUrl;
-    a.download = `gemcam-${Date.now()}.png`;
+    a.download = filename;
     a.click();
   }
 
@@ -95,7 +109,7 @@ export function ResultScreen({
         </button>
         <button
           className="kodak-btn"
-          onClick={download}
+          onClick={save}
           disabled={!imageDataUrl}
         >
           <Icon icon="material-symbols:download-rounded" width={18} />

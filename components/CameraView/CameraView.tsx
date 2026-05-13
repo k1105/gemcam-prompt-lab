@@ -98,7 +98,7 @@ export const CameraView = forwardRef<HTMLVideoElement, Props>(
         >
           <video
             ref={ref}
-            className={styles.video}
+            className={`${styles.video} ${facingMode === "user" ? styles.mirrored : ""}`}
             playsInline
             muted
             autoPlay
