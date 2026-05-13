@@ -96,6 +96,44 @@ export function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+export async function readFileAsCroppedDataUrl(
+  file: File,
+  aspectRatio: AspectRatio,
+  maxDim = 1200,
+  quality = 0.9,
+): Promise<string> {
+  const dataUrl = await readFileAsDataUrl(file);
+  const img = await loadImage(dataUrl);
+  const iw = img.width;
+  const ih = img.height;
+  const targetRatio = aspectRatioToNumber(aspectRatio);
+  const sourceRatio = iw / ih;
+
+  let sx = 0;
+  let sy = 0;
+  let sw = iw;
+  let sh = ih;
+
+  if (sourceRatio > targetRatio) {
+    sw = ih * targetRatio;
+    sx = (iw - sw) / 2;
+  } else {
+    sh = iw / targetRatio;
+    sy = (ih - sh) / 2;
+  }
+
+  const scale = Math.min(1, maxDim / Math.max(sw, sh));
+  const finalW = Math.round(sw * scale);
+  const finalH = Math.round(sh * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = finalW;
+  canvas.height = finalH;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, finalW, finalH);
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
 export async function readFileAsResizedDataUrl(
   file: File,
   maxDim = 1600,

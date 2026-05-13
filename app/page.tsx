@@ -12,6 +12,7 @@ import { ResultScreen } from "@/components/ResultScreen/ResultScreen";
 import { ShutterBar } from "@/components/ShutterBar/ShutterBar";
 import {
   captureFrame,
+  readFileAsCroppedDataUrl,
   type AspectRatio,
   type FacingMode,
 } from "@/lib/camera";
@@ -22,6 +23,7 @@ type Phase = "camera" | "processing" | "result";
 
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const [phase, setPhase] = useState<Phase>("camera");
   const [facingMode, setFacingMode] = useState<FacingMode>("environment");
@@ -111,6 +113,53 @@ export default function Home() {
       setPhase("result");
     }
   }, [aspectRatio, selectedFilter]);
+
+  const runGenerate = useCallback(
+    async (dataUrl: string, filter: PromptFilter) => {
+      setCapturedDataUrl(dataUrl);
+      setResultDataUrl(null);
+      setGenerateError(null);
+      setPhase("processing");
+
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageDataUrl: dataUrl,
+            filterId: filter.id,
+            aspectRatio,
+          }),
+        });
+        const json = (await res.json()) as GenerateResponse;
+        if (!json.ok) {
+          setGenerateError(json.error);
+        } else {
+          setResultDataUrl(json.imageDataUrl);
+        }
+      } catch (err) {
+        setGenerateError(err instanceof Error ? err.message : "request failed");
+      } finally {
+        setPhase("result");
+      }
+    },
+    [aspectRatio],
+  );
+
+  const handleImportClick = useCallback(() => {
+    importInputRef.current?.click();
+  }, []);
+
+  const handleImportChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file || !selectedFilter) return;
+      const dataUrl = await readFileAsCroppedDataUrl(file, aspectRatio);
+      await runGenerate(dataUrl, selectedFilter);
+    },
+    [aspectRatio, runGenerate, selectedFilter],
+  );
 
   const handleSelectFilter = useCallback(
     (id: string) => {
@@ -277,11 +326,20 @@ export default function Home() {
           <ShutterBar
             onShutter={handleShutter}
             onFlipCamera={handleFlipCamera}
+            onImport={handleImportClick}
             disabled={!selectedFilter || phase !== "camera" || countdown != null}
             flipDisabled={!cameraReady || countdown != null}
+            importDisabled={!selectedFilter || countdown != null}
           />
         </>
       )}
+      <input
+        ref={importInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={handleImportChange}
+      />
       <FilterCreateModal
         open={modalOpen || !!editingFilterId}
         onClose={() => {

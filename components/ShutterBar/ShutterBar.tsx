@@ -6,15 +6,19 @@ import styles from "./ShutterBar.module.css";
 type Props = {
   onShutter: () => void;
   onFlipCamera: () => void;
+  onImport: () => void;
   disabled?: boolean;
   flipDisabled?: boolean;
+  importDisabled?: boolean;
 };
 
 export function ShutterBar({
   onShutter,
   onFlipCamera,
+  onImport,
   disabled,
   flipDisabled,
+  importDisabled,
 }: Props) {
   return (
     <div className={styles.bar}>
@@ -32,7 +36,14 @@ export function ShutterBar({
         disabled={disabled}
         aria-label="Take photo"
       />
-      <span className={styles.spacer} />
+      <button
+        className={styles.iconBtn}
+        onClick={onImport}
+        disabled={importDisabled}
+        aria-label="Import from album"
+      >
+        <Icon icon="material-symbols:photo-library-outline-rounded" width={22} />
+      </button>
     </div>
   );
 }
