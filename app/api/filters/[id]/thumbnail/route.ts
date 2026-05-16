@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAuthedUserOrResponse } from "@/lib/auth-server";
 import { dataUrlToBuffer } from "@/lib/camera";
 import { getFilter, updateFilter } from "@/lib/filters";
 import { uploadReferenceImage } from "@/lib/storage";
@@ -9,6 +10,8 @@ export async function POST(
   req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const auth = await getAuthedUserOrResponse();
+  if (auth.response) return auth.response;
   try {
     const { id } = await ctx.params;
     const filter = await getFilter(id);

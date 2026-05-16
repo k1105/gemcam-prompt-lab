@@ -5,8 +5,18 @@ export type ReferenceImage = {
   mimeType: string;
 };
 
+export type Project = {
+  id: string;
+  name: string;
+  createdBy?: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
 export type PromptFilter = {
   id: string;
+  projectId: string;
+  shareSlug: string;
   name: string;
   prompt: string;
   referenceImages: ReferenceImage[];

@@ -1,7 +1,13 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { uploadReferenceImage } from "./storage";
-import { createFilter, listFilters } from "./filters";
+import {
+  backfillFiltersToProject,
+  backfillShareSlugs,
+  createFilter,
+  listFilters,
+} from "./filters";
+import { createProject, listProjects } from "./projects";
 
 type SeedEntry = {
   name: string;
@@ -37,9 +43,31 @@ const SEEDS: SeedEntry[] = [
   },
 ];
 
+const DEFAULT_PROJECT_NAME = "Default";
+
+// Ensures at least one project exists, and backfills any pre-existing
+// filters that lack a projectId onto that default project.
+export async function ensureDefaultProject(): Promise<string> {
+  const projects = await listProjects();
+  let defaultProjectId: string;
+  if (projects.length === 0) {
+    const created = await createProject({
+      name: DEFAULT_PROJECT_NAME,
+      createdBy: "system",
+    });
+    defaultProjectId = created.id;
+  } else {
+    defaultProjectId = projects[0].id;
+  }
+  await backfillFiltersToProject(defaultProjectId);
+  await backfillShareSlugs();
+  return defaultProjectId;
+}
+
 // Seeds initial filters when the database is completely empty.
 // Idempotent: re-running with existing filters is a no-op.
 export async function seedIfEmpty(): Promise<void> {
+  const defaultProjectId = await ensureDefaultProject();
   const existing = await listFilters();
   if (existing.length > 0) return;
 
@@ -56,6 +84,7 @@ export async function seedIfEmpty(): Promise<void> {
       refs.push(uploaded);
     }
     await createFilter({
+      projectId: defaultProjectId,
       name: entry.name,
       prompt: entry.prompt,
       referenceImages: refs,

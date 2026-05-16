@@ -1,25 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthedUserOrResponse } from "@/lib/auth-server";
-import { dataUrlToBuffer, ASPECT_RATIOS, type AspectRatio } from "@/lib/camera";
-import { getFilter } from "@/lib/filters";
+import { ASPECT_RATIOS, dataUrlToBuffer, type AspectRatio } from "@/lib/camera";
+import { getFilterByShareSlug } from "@/lib/filters";
 import { generateImage } from "@/lib/gemini";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-export async function POST(req: NextRequest) {
-  const auth = await getAuthedUserOrResponse();
-  if (auth.response) return auth.response;
+// Public endpoint — generation through a share link. Auth-free by design;
+// looked up only by shareSlug so callers cannot pick arbitrary filters.
+export async function POST(
+  req: NextRequest,
+  ctx: { params: Promise<{ slug: string }> },
+) {
   try {
+    const { slug } = await ctx.params;
     const body = (await req.json()) as {
       imageDataUrl?: string;
-      filterId?: string;
       aspectRatio?: AspectRatio;
     };
 
-    if (!body.imageDataUrl || !body.filterId || !body.aspectRatio) {
+    if (!body.imageDataUrl || !body.aspectRatio) {
       return NextResponse.json(
-        { ok: false, error: "imageDataUrl, filterId, aspectRatio are required" },
+        { ok: false, error: "imageDataUrl, aspectRatio are required" },
         { status: 400 },
       );
     }
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const filter = await getFilter(body.filterId);
+    const filter = await getFilterByShareSlug(slug);
     if (!filter) {
       return NextResponse.json(
         { ok: false, error: "filter not found" },

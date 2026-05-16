@@ -3,7 +3,7 @@ import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import type { Bucket } from "@google-cloud/storage";
 
-function getAdminApp(): App {
+export function getAdminApp(): App {
   if (getApps().length) return getApp();
   const {
     FIREBASE_PROJECT_ID,
@@ -41,3 +41,4 @@ export function getBucket(): Bucket {
 }
 
 export const FILTERS_COLLECTION = "filters";
+export const PROJECTS_COLLECTION = "projects";

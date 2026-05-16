@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAuthedUserOrResponse } from "@/lib/auth-server";
 import { deleteFilter, getFilter, updateFilter } from "@/lib/filters";
 import { uploadReferenceImage } from "@/lib/storage";
 
@@ -8,6 +9,8 @@ export async function GET(
   _req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const auth = await getAuthedUserOrResponse();
+  if (auth.response) return auth.response;
   const { id } = await ctx.params;
   const filter = await getFilter(id);
   if (!filter) {
@@ -20,6 +23,8 @@ export async function PUT(
   req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const auth = await getAuthedUserOrResponse();
+  if (auth.response) return auth.response;
   try {
     const { id } = await ctx.params;
     const filter = await getFilter(id);
@@ -69,6 +74,8 @@ export async function DELETE(
   _req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const auth = await getAuthedUserOrResponse();
+  if (auth.response) return auth.response;
   const { id } = await ctx.params;
   await deleteFilter(id);
   return NextResponse.json({ ok: true });

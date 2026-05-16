@@ -6,6 +6,7 @@ import type { PromptFilter, ReferenceImage } from "@/lib/types";
 import styles from "./FilterCreateModal.module.css";
 
 type Props = {
+  projectId: string;
   open: boolean;
   onClose: () => void;
   onCreated: (filter: PromptFilter) => void;
@@ -14,7 +15,7 @@ type Props = {
   onDeleted?: (id: string) => void;
 };
 
-export function FilterCreateModal({ open, onClose, onCreated, filterToEdit, onUpdated, onDeleted }: Props) {
+export function FilterCreateModal({ projectId, open, onClose, onCreated, filterToEdit, onUpdated, onDeleted }: Props) {
   const [name, setName] = useState("");
   const [prompt, setPrompt] = useState("");
   const [createdBy, setCreatedBy] = useState("");
@@ -32,6 +33,7 @@ export function FilterCreateModal({ open, onClose, onCreated, filterToEdit, onUp
   const [progress1, setProgress1] = useState(0);
   const [progress2, setProgress2] = useState(0);
   const thinkInputRef = useRef<HTMLInputElement>(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -93,6 +95,7 @@ export function FilterCreateModal({ open, onClose, onCreated, filterToEdit, onUp
       form.append("name", name.trim());
       form.append("prompt", prompt.trim());
       if (createdBy.trim()) form.append("createdBy", createdBy.trim());
+      if (!filterToEdit) form.append("projectId", projectId);
       
       if (filterToEdit) {
         for (const r of existingRefs) {
@@ -120,6 +123,19 @@ export function FilterCreateModal({ open, onClose, onCreated, filterToEdit, onUp
       setError(err instanceof Error ? err.message : "unknown error");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleCopyShareLink() {
+    if (!filterToEdit?.shareSlug) return;
+    const url = `${window.location.origin}/s/${filterToEdit.shareSlug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 1600);
+    } catch {
+      // Fallback: select-and-copy via prompt (rare on modern browsers)
+      window.prompt("リンクをコピーしてください", url);
     }
   }
 
@@ -400,32 +416,48 @@ export function FilterCreateModal({ open, onClose, onCreated, filterToEdit, onUp
           )}
         </div>
         {tab === "manual" && (
-          <div className={styles.footer}>
-            {filterToEdit && (
+          <>
+            {filterToEdit?.shareSlug && (
+              <div className={styles.shareRow}>
+                <button
+                  className="kodak-btn kodak-btn--ghost"
+                  onClick={handleCopyShareLink}
+                  disabled={submitting || deleting}
+                  type="button"
+                  style={{ width: "100%" }}
+                >
+                  <Icon icon="material-symbols:share-rounded" width={16} />
+                  {shareCopied ? "COPIED!" : "COPY SHARE LINK"}
+                </button>
+              </div>
+            )}
+            <div className={styles.footer}>
+              {filterToEdit && (
+                <button
+                  className="kodak-btn kodak-btn--ghost"
+                  onClick={handleDelete}
+                  disabled={submitting || deleting}
+                  style={{ color: "var(--color-red)", flex: 0.5 }}
+                >
+                  DELETE
+                </button>
+              )}
               <button
                 className="kodak-btn kodak-btn--ghost"
-                onClick={handleDelete}
+                onClick={handleClose}
                 disabled={submitting || deleting}
-                style={{ color: "var(--color-red)", flex: 0.5 }}
               >
-                DELETE
+                CANCEL
               </button>
-            )}
-            <button
-              className="kodak-btn kodak-btn--ghost"
-              onClick={handleClose}
-              disabled={submitting || deleting}
-            >
-              CANCEL
-            </button>
-            <button
-              className="kodak-btn"
-              onClick={handleSubmit}
-              disabled={submitting || deleting}
-            >
-              {submitting ? "SAVING…" : "SAVE"}
-            </button>
-          </div>
+              <button
+                className="kodak-btn"
+                onClick={handleSubmit}
+                disabled={submitting || deleting}
+              >
+                {submitting ? "SAVING…" : "SAVE"}
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
