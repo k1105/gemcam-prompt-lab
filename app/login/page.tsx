@@ -14,10 +14,14 @@ function LoginInner() {
   const { user, loading, signingIn, signInWithGoogle, error } = useAuth();
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace(next);
-    }
-  }, [loading, user, next, router]);
+    // Wait until both the Firebase user is set AND signInWithGoogle has fully
+    // resolved (it sets signingIn=false only after POSTing the session cookie).
+    // Otherwise we redirect before the cookie is in place, and proxy.ts
+    // bounces us back to /login.
+    if (loading || signingIn) return;
+    if (!user) return;
+    router.replace(next);
+  }, [loading, signingIn, user, next, router]);
 
   return (
     <div className={styles.body}>
