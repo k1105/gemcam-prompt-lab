@@ -3,9 +3,9 @@ import { getFilterByShareSlug } from "@/lib/filters";
 
 export const runtime = "nodejs";
 
-// Public endpoint — used by /s/[slug] page. Returns a minimal projection of the
-// filter (no createdBy, no internal IDs beyond what's needed to render & call
-// generate-share).
+// Public endpoint — used by /share/[slug] page. Returns a minimal projection of
+// the filter (no createdBy, no internal IDs beyond what's needed to render &
+// call generate-share).
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ slug: string }> },

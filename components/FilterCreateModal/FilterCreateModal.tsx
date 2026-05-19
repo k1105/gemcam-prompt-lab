@@ -128,7 +128,7 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
 
   async function handleCopyShareLink() {
     if (!filterToEdit?.shareSlug) return;
-    const url = `${window.location.origin}/s/${filterToEdit.shareSlug}`;
+    const url = `${window.location.origin}/share/${filterToEdit.shareSlug}`;
     try {
       await navigator.clipboard.writeText(url);
       setShareCopied(true);

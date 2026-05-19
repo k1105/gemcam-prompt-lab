@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/components/AppHeader/AppHeader";
 import { AspectRatioSelector } from "@/components/AspectRatioSelector/AspectRatioSelector";
@@ -19,22 +18,20 @@ import styles from "./page.module.css";
 
 type Phase = "camera" | "processing" | "result";
 
-type ShareFilter = {
+export type ShareFilter = {
   shareSlug: string;
   name: string;
   thumbnailUrl: string | null;
 };
 
-export default function ShareCameraPage() {
-  const params = useParams<{ slug: string }>();
-  const slug = params.slug;
+type Props = {
+  slug: string;
+  filter: ShareFilter;
+};
 
+export function ShareCameraClient({ slug, filter }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
-
-  const [filter, setFilter] = useState<ShareFilter | null>(null);
-  const [filterMissing, setFilterMissing] = useState(false);
-  const [filterError, setFilterError] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("camera");
   const [facingMode, setFacingMode] = useState<FacingMode>("environment");
@@ -47,33 +44,6 @@ export default function ShareCameraPage() {
   const [resultDataUrl, setResultDataUrl] = useState<string | null>(null);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/share/${encodeURIComponent(slug)}`);
-        if (cancelled) return;
-        if (res.status === 404) {
-          setFilterMissing(true);
-          return;
-        }
-        if (!res.ok) {
-          const json = await res.json().catch(() => ({}));
-          setFilterError(json.error ?? "failed to load filter");
-          return;
-        }
-        const json = await res.json();
-        if (json.filter) setFilter(json.filter);
-      } catch (err) {
-        if (cancelled) return;
-        setFilterError(err instanceof Error ? err.message : "unknown error");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
 
   const runGenerate = useCallback(
     async (dataUrl: string) => {
@@ -108,7 +78,7 @@ export default function ShareCameraPage() {
 
   const handleShutter = useCallback(async () => {
     const video = videoRef.current;
-    if (!video || !filter) return;
+    if (!video) return;
 
     for (let n = 3; n >= 1; n--) {
       setCountdown(n);
@@ -118,7 +88,7 @@ export default function ShareCameraPage() {
 
     const dataUrl = captureFrame(video, aspectRatio);
     await runGenerate(dataUrl);
-  }, [aspectRatio, filter, runGenerate]);
+  }, [aspectRatio, runGenerate]);
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click();
@@ -128,11 +98,11 @@ export default function ShareCameraPage() {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       e.target.value = "";
-      if (!file || !filter) return;
+      if (!file) return;
       const dataUrl = await readFileAsCroppedDataUrl(file, aspectRatio);
       await runGenerate(dataUrl);
     },
-    [aspectRatio, filter, runGenerate],
+    [aspectRatio, runGenerate],
   );
 
   const handleRetake = useCallback(() => {
@@ -196,32 +166,6 @@ export default function ShareCameraPage() {
       }
     }
   }, [videoDevices]);
-
-  if (filterMissing || filterError) {
-    return (
-      <main className={styles.app}>
-        <AppHeader />
-        <div className={styles.missing}>
-          <p>
-            {filterMissing
-              ? "このシェアリンクは無効か、もう利用できません。"
-              : `読み込みに失敗しました: ${filterError}`}
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  if (!filter) {
-    return (
-      <main className={styles.app}>
-        <AppHeader />
-        <div className={styles.missing}>
-          <p>読み込み中…</p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className={styles.app}>
