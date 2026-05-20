@@ -193,6 +193,7 @@ export function ShareCameraClient({ slug, filter }: Props) {
         {phase === "result" && (
           <ResultScreen
             imageDataUrl={resultDataUrl}
+            beforeDataUrl={capturedDataUrl}
             filterName={filter.name}
             error={generateError}
             onRetake={handleRetake}

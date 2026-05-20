@@ -41,9 +41,10 @@ export function buildGoogleProvider(): GoogleAuthProvider {
   return provider;
 }
 
-export const ALLOWED_EMAIL_DOMAIN = "@dentsu.co.jp";
+export const ALLOWED_EMAIL_DOMAINS = ["@dentsu.co.jp", "@gemini.dentsu.co.jp"];
 
 export function isAllowedEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return email.toLowerCase().endsWith(ALLOWED_EMAIL_DOMAIN);
+  const lower = email.toLowerCase();
+  return ALLOWED_EMAIL_DOMAINS.some((domain) => lower.endsWith(domain));
 }

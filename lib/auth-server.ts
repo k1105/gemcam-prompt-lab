@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getAuth } from "firebase-admin/auth";
 import { getAdminApp } from "./firebase";
 
-const ALLOWED_DOMAIN = "@dentsu.co.jp";
+const ALLOWED_DOMAINS = ["@dentsu.co.jp", "@gemini.dentsu.co.jp"];
 export const SESSION_COOKIE_NAME = "session";
 // 14 days, Firebase max.
 export const SESSION_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
@@ -19,7 +19,8 @@ export type AuthedUser = {
 
 export function isAllowedEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return email.toLowerCase().endsWith(ALLOWED_DOMAIN);
+  const lower = email.toLowerCase();
+  return ALLOWED_DOMAINS.some((domain) => lower.endsWith(domain));
 }
 
 export async function createSessionCookie(idToken: string): Promise<string> {

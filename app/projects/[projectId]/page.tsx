@@ -369,6 +369,7 @@ export default function ProjectCameraPage() {
         {phase === "result" && (
           <ResultScreen
             imageDataUrl={resultDataUrl}
+            beforeDataUrl={capturedDataUrl}
             filterName={selectedFilter?.name ?? ""}
             error={generateError}
             onRetake={handleRetake}
