@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ASPECT_RATIOS, dataUrlToBuffer, type AspectRatio } from "@/lib/camera";
 import { getFilterByShareSlug } from "@/lib/filters";
+import { applyFrameIfConfigured } from "@/lib/frames";
 import { generateImage } from "@/lib/gemini";
 
 export const runtime = "nodejs";
@@ -41,9 +42,15 @@ export async function POST(
     }
 
     const { buffer, mimeType } = dataUrlToBuffer(body.imageDataUrl);
-    const result = await generateImage({
+    const generated = await generateImage({
       imageBuffer: buffer,
       mimeType,
+      filter,
+      aspectRatio: body.aspectRatio,
+    });
+    const result = await applyFrameIfConfigured({
+      buffer: generated.buffer,
+      mimeType: generated.mimeType,
       filter,
       aspectRatio: body.aspectRatio,
     });

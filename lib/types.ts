@@ -5,6 +5,14 @@ export type ReferenceImage = {
   mimeType: string;
 };
 
+// PNG overlay composited onto generated images. One frame per aspect ratio;
+// applied only when the matching aspect ratio is selected at generation time.
+export type FrameImage = {
+  aspectRatio: AspectRatio;
+  url: string;
+  mimeType: string;
+};
+
 export type Project = {
   id: string;
   name: string;
@@ -20,6 +28,7 @@ export type PromptFilter = {
   name: string;
   prompt: string;
   referenceImages: ReferenceImage[];
+  frameImages: FrameImage[];
   thumbnailUrl?: string;
   createdBy?: string;
   createdAt: number;

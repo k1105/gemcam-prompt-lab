@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedUserOrResponse } from "@/lib/auth-server";
 import { createFilter, listFilters } from "@/lib/filters";
+import { uploadFramesFromForm } from "@/lib/frames";
 import { uploadReferenceImage } from "@/lib/storage";
 import { ensureDefaultProject, seedIfEmpty } from "@/lib/seed";
 import { getProject } from "@/lib/projects";
@@ -70,11 +71,14 @@ export async function POST(req: NextRequest) {
       refs.push(uploaded);
     }
 
+    const frameImages = await uploadFramesFromForm(form);
+
     const filter = await createFilter({
       projectId,
       name,
       prompt,
       referenceImages: refs,
+      frameImages,
       createdBy,
     });
     return NextResponse.json({ filter }, { status: 201 });

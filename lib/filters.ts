@@ -1,7 +1,7 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { FILTERS_COLLECTION, getDb } from "./firebase";
 import { generateShareSlug } from "./slug";
-import type { PromptFilter, ReferenceImage } from "./types";
+import type { FrameImage, PromptFilter, ReferenceImage } from "./types";
 
 type DocData = {
   projectId?: string;
@@ -9,6 +9,7 @@ type DocData = {
   name: string;
   prompt: string;
   referenceImages: ReferenceImage[];
+  frameImages?: FrameImage[];
   thumbnailUrl?: string | null;
   createdBy?: string | null;
   createdAt: Timestamp;
@@ -23,6 +24,7 @@ function docToFilter(id: string, data: DocData): PromptFilter {
     name: data.name,
     prompt: data.prompt,
     referenceImages: data.referenceImages ?? [],
+    frameImages: data.frameImages ?? [],
     thumbnailUrl: data.thumbnailUrl ?? undefined,
     createdBy: data.createdBy ?? undefined,
     createdAt: data.createdAt.toMillis(),
@@ -67,6 +69,7 @@ export async function createFilter(input: {
   name: string;
   prompt: string;
   referenceImages: ReferenceImage[];
+  frameImages?: FrameImage[];
   createdBy?: string;
 }): Promise<PromptFilter> {
   const db = getDb();
@@ -76,6 +79,7 @@ export async function createFilter(input: {
     name: input.name,
     prompt: input.prompt,
     referenceImages: input.referenceImages,
+    frameImages: input.frameImages ?? [],
     createdBy: input.createdBy ?? null,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
@@ -128,6 +132,7 @@ export async function updateFilter(
     name: string;
     prompt: string;
     referenceImages: ReferenceImage[];
+    frameImages: FrameImage[];
     thumbnailUrl: string | null;
     createdBy: string | null;
   }>,
@@ -143,6 +148,7 @@ export async function updateFilter(
   if (input.prompt !== undefined) updates.prompt = input.prompt;
   if (input.referenceImages !== undefined)
     updates.referenceImages = input.referenceImages;
+  if (input.frameImages !== undefined) updates.frameImages = input.frameImages;
   if (input.thumbnailUrl !== undefined) updates.thumbnailUrl = input.thumbnailUrl;
   if (input.createdBy !== undefined) updates.createdBy = input.createdBy;
 

@@ -31,6 +31,28 @@ export async function uploadReferenceImage(
   return { url: buildDownloadUrl(bucket.name, path, token), mimeType };
 }
 
+export async function uploadFrameImage(
+  buffer: Buffer,
+  mimeType: string,
+  filename = "frame",
+): Promise<{ url: string; mimeType: string }> {
+  const bucket = getBucket();
+  const safeName = filename.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 40);
+  const path = `frames/${crypto.randomUUID()}-${safeName}.png`;
+  const token = crypto.randomUUID();
+
+  const file = bucket.file(path);
+  await file.save(buffer, {
+    resumable: false,
+    metadata: {
+      contentType: mimeType,
+      metadata: { firebaseStorageDownloadTokens: token },
+    },
+  });
+
+  return { url: buildDownloadUrl(bucket.name, path, token), mimeType };
+}
+
 export async function fetchAsInlineData(
   url: string,
 ): Promise<{ data: string; mimeType: string }> {

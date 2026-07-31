@@ -2,7 +2,8 @@
 
 import { Icon } from "@iconify/react";
 import { useEffect, useRef, useState } from "react";
-import type { PromptFilter, ReferenceImage } from "@/lib/types";
+import { ASPECT_RATIOS, type AspectRatio } from "@/lib/camera";
+import type { FrameImage, PromptFilter, ReferenceImage } from "@/lib/types";
 import styles from "./FilterCreateModal.module.css";
 
 type Props = {
@@ -21,10 +22,16 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
   const [createdBy, setCreatedBy] = useState("");
   const [existingRefs, setExistingRefs] = useState<ReferenceImage[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [existingFrames, setExistingFrames] = useState<FrameImage[]>([]);
+  const [frameFiles, setFrameFiles] = useState<
+    Partial<Record<AspectRatio, File>>
+  >({});
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const frameInputRef = useRef<HTMLInputElement>(null);
+  const frameTargetRatioRef = useRef<AspectRatio | null>(null);
 
   const [tab, setTab] = useState<"manual" | "image">("manual");
   const [thinkImage, setThinkImage] = useState<File | null>(null);
@@ -42,12 +49,16 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
         setPrompt(filterToEdit.prompt);
         setCreatedBy(filterToEdit.createdBy ?? "");
         setExistingRefs(filterToEdit.referenceImages ?? []);
+        setExistingFrames(filterToEdit.frameImages ?? []);
+        setFrameFiles({});
       } else {
         setName("");
         setPrompt("");
         setCreatedBy("");
         setExistingRefs([]);
         setFiles([]);
+        setExistingFrames([]);
+        setFrameFiles({});
         setError(null);
         setTab("manual");
         setThinkImage(null);
@@ -63,6 +74,8 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
     setCreatedBy("");
     setExistingRefs([]);
     setFiles([]);
+    setExistingFrames([]);
+    setFrameFiles({});
     setError(null);
     setTab("manual");
     setThinkImage(null);
@@ -83,6 +96,31 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
     setFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function pickFrame(ratio: AspectRatio) {
+    frameTargetRatioRef.current = ratio;
+    frameInputRef.current?.click();
+  }
+
+  function handleFrameChosen(file: File | null) {
+    const ratio = frameTargetRatioRef.current;
+    frameTargetRatioRef.current = null;
+    if (!file || !ratio) return;
+    if (file.type !== "image/png") {
+      setError("フレーム画像は透過PNGを指定してください。");
+      return;
+    }
+    setFrameFiles((prev) => ({ ...prev, [ratio]: file }));
+  }
+
+  function removeFrame(ratio: AspectRatio) {
+    setFrameFiles((prev) => {
+      const next = { ...prev };
+      delete next[ratio];
+      return next;
+    });
+    setExistingFrames((prev) => prev.filter((f) => f.aspectRatio !== ratio));
+  }
+
   async function handleSubmit() {
     setError(null);
     if (!name.trim() || !prompt.trim()) {
@@ -101,9 +139,19 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
         for (const r of existingRefs) {
           form.append("existingReferenceUrls", r.url);
         }
+        for (const f of existingFrames) {
+          form.append("existingFrameAspectRatios", f.aspectRatio);
+        }
       }
-      
+
       for (const f of files) form.append("references", f);
+
+      for (const ratio of ASPECT_RATIOS) {
+        const file = frameFiles[ratio];
+        if (!file) continue;
+        form.append("frames", file);
+        form.append("frameAspectRatios", ratio);
+      }
       
       const method = filterToEdit ? "PUT" : "POST";
       const url = filterToEdit ? `/api/filters/${filterToEdit.id}` : "/api/filters";
@@ -400,6 +448,65 @@ export function FilterCreateModal({ projectId, open, onClose, onCreated, filterT
                     ))}
                   </div>
                 )}
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>
+                  FRAME IMAGES (optional / 透過PNG)
+                </label>
+                <div className={styles.frameHint}>
+                  アスペクト比ごとにフレームを設定できます。設定した比率で撮影したときのみ、生成画像の上にフレームが合成されます。
+                </div>
+                <div className={styles.frameGrid}>
+                  {ASPECT_RATIOS.map((ratio) => {
+                    const newFile = frameFiles[ratio];
+                    const existing = existingFrames.find(
+                      (f) => f.aspectRatio === ratio,
+                    );
+                    const previewUrl = newFile
+                      ? URL.createObjectURL(newFile)
+                      : existing?.url;
+                    return (
+                      <div key={ratio} className={styles.frameSlot}>
+                        <span className={styles.frameRatio}>{ratio}</span>
+                        {previewUrl ? (
+                          <div className={styles.framePreview}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={previewUrl} alt={`Frame ${ratio}`} />
+                            <button
+                              className={styles.thumbRemove}
+                              onClick={() => removeFrame(ratio)}
+                              aria-label={`Remove frame ${ratio}`}
+                              type="button"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className={styles.frameAdd}
+                            onClick={() => pickFrame(ratio)}
+                            type="button"
+                          >
+                            <Icon
+                              icon="material-symbols:add-photo-alternate-outline"
+                              width={20}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <input
+                  ref={frameInputRef}
+                  type="file"
+                  accept="image/png"
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    handleFrameChosen(e.target.files?.[0] ?? null);
+                    e.target.value = "";
+                  }}
+                />
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>YOUR NAME (optional)</label>

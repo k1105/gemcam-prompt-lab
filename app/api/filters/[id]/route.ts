@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthedUserOrResponse } from "@/lib/auth-server";
 import { deleteFilter, getFilter, updateFilter } from "@/lib/filters";
+import { uploadFramesFromForm } from "@/lib/frames";
 import { uploadReferenceImage } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -56,11 +57,23 @@ export async function PUT(
       newRefs.push(uploaded);
     }
 
+    // existing frames to keep (by aspect ratio); new uploads replace kept ones
+    // for the same ratio
+    const keptFrameRatios = form.getAll("existingFrameAspectRatios").map(String);
+    const newFrames = await uploadFramesFromForm(form);
+    const newFrameRatios = newFrames.map((f) => f.aspectRatio);
+    const keptFrames = (filter.frameImages ?? []).filter(
+      (f) =>
+        keptFrameRatios.includes(f.aspectRatio) &&
+        !newFrameRatios.includes(f.aspectRatio),
+    );
+
     const updatedFilter = await updateFilter(id, {
       ...(name !== undefined && { name }),
       ...(prompt !== undefined && { prompt }),
       ...(createdBy !== undefined && { createdBy }),
       referenceImages: [...keptReferences, ...newRefs],
+      frameImages: [...keptFrames, ...newFrames],
     });
 
     return NextResponse.json({ filter: updatedFilter });
