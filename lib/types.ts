@@ -13,7 +13,16 @@ export type FrameImage = {
   mimeType: string;
 };
 
-export type Project = {
+// Per-project visual customisation. Colors are "#rrggbb" hex strings that
+// override the app's default yellow (primary) and red (accent). All optional;
+// missing values fall back to the global defaults.
+export type ProjectTheme = {
+  primaryColor?: string;
+  accentColor?: string;
+  logoUrl?: string;
+};
+
+export type Project = ProjectTheme & {
   id: string;
   name: string;
   createdBy?: string;

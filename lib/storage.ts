@@ -53,6 +53,41 @@ export async function uploadFrameImage(
   return { url: buildDownloadUrl(bucket.name, path, token), mimeType };
 }
 
+const LOGO_EXT: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+  "image/svg+xml": "svg",
+  "image/gif": "gif",
+};
+
+export function isSupportedLogoMimeType(mimeType: string): boolean {
+  return mimeType in LOGO_EXT;
+}
+
+export async function uploadLogoImage(
+  buffer: Buffer,
+  mimeType: string,
+  filename = "logo",
+): Promise<{ url: string; mimeType: string }> {
+  const bucket = getBucket();
+  const ext = LOGO_EXT[mimeType] ?? "png";
+  const safeName = filename.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 40);
+  const path = `logos/${crypto.randomUUID()}-${safeName}.${ext}`;
+  const token = crypto.randomUUID();
+
+  const file = bucket.file(path);
+  await file.save(buffer, {
+    resumable: false,
+    metadata: {
+      contentType: mimeType,
+      metadata: { firebaseStorageDownloadTokens: token },
+    },
+  });
+
+  return { url: buildDownloadUrl(bucket.name, path, token), mimeType };
+}
+
 export async function fetchAsInlineData(
   url: string,
 ): Promise<{ data: string; mimeType: string }> {

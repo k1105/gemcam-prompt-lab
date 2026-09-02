@@ -20,6 +20,7 @@ import {
   type AspectRatio,
   type FacingMode,
 } from "@/lib/camera";
+import { projectThemeStyle } from "@/lib/theme";
 import type { GenerateResponse, Project, PromptFilter } from "@/lib/types";
 import styles from "./page.module.css";
 
@@ -336,9 +337,10 @@ export default function ProjectCameraPage() {
   }
 
   return (
-    <main className={styles.app}>
+    <main className={styles.app} style={projectThemeStyle(project)}>
       <AppHeader
         title={project?.name}
+        logoUrl={project?.logoUrl}
         leftSlot={
           <Link href="/" className={styles.backBtn} aria-label="Back">
             <Icon icon="material-symbols:arrow-back-rounded" width={20} />

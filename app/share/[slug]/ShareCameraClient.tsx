@@ -13,6 +13,7 @@ import {
   type AspectRatio,
   type FacingMode,
 } from "@/lib/camera";
+import { projectThemeStyle } from "@/lib/theme";
 import type { GenerateResponse } from "@/lib/types";
 import styles from "./page.module.css";
 
@@ -24,12 +25,19 @@ export type ShareFilter = {
   thumbnailUrl: string | null;
 };
 
+export type ShareTheme = {
+  primaryColor: string | null;
+  accentColor: string | null;
+  logoUrl: string | null;
+};
+
 type Props = {
   slug: string;
   filter: ShareFilter;
+  theme?: ShareTheme;
 };
 
-export function ShareCameraClient({ slug, filter }: Props) {
+export function ShareCameraClient({ slug, filter, theme }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -167,9 +175,14 @@ export function ShareCameraClient({ slug, filter }: Props) {
     }
   }, [videoDevices]);
 
+  const themeStyle = projectThemeStyle({
+    primaryColor: theme?.primaryColor ?? undefined,
+    accentColor: theme?.accentColor ?? undefined,
+  });
+
   return (
-    <main className={styles.app}>
-      <AppHeader title={filter.name} />
+    <main className={styles.app} style={themeStyle}>
+      <AppHeader title={filter.name} logoUrl={theme?.logoUrl} />
       {phase === "camera" && (
         <AspectRatioSelector value={aspectRatio} onChange={setAspectRatio} />
       )}

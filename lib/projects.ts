@@ -5,6 +5,9 @@ import type { Project } from "./types";
 type DocData = {
   name: string;
   createdBy?: string | null;
+  primaryColor?: string | null;
+  accentColor?: string | null;
+  logoUrl?: string | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
@@ -14,6 +17,9 @@ function docToProject(id: string, data: DocData): Project {
     id,
     name: data.name,
     createdBy: data.createdBy ?? undefined,
+    primaryColor: data.primaryColor ?? undefined,
+    accentColor: data.accentColor ?? undefined,
+    logoUrl: data.logoUrl ?? undefined,
     createdAt: data.createdAt.toMillis(),
     updatedAt: data.updatedAt.toMillis(),
   };
@@ -52,7 +58,14 @@ export async function createProject(input: {
 
 export async function updateProject(
   id: string,
-  input: Partial<{ name: string; createdBy: string | null }>,
+  input: Partial<{
+    name: string;
+    createdBy: string | null;
+    // null clears the value (falls back to the default theme)
+    primaryColor: string | null;
+    accentColor: string | null;
+    logoUrl: string | null;
+  }>,
 ): Promise<Project | null> {
   const db = getDb();
   const ref = db.collection(PROJECTS_COLLECTION).doc(id);
@@ -61,6 +74,9 @@ export async function updateProject(
   };
   if (input.name !== undefined) updates.name = input.name;
   if (input.createdBy !== undefined) updates.createdBy = input.createdBy;
+  if (input.primaryColor !== undefined) updates.primaryColor = input.primaryColor;
+  if (input.accentColor !== undefined) updates.accentColor = input.accentColor;
+  if (input.logoUrl !== undefined) updates.logoUrl = input.logoUrl;
   await ref.update(updates);
   return getProject(id);
 }

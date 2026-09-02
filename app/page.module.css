@@ -58,13 +58,17 @@
   border: var(--border-thin);
   border-radius: 8px;
   overflow: hidden;
+  display: flex;
+  align-items: stretch;
 }
 
 .itemLink {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
   color: var(--color-ink);
   text-decoration: none;
   font-weight: 700;
@@ -74,9 +78,51 @@
   background: var(--color-bg-mute, #f3f3f3);
 }
 
+.itemMark {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.itemMark img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.itemSwatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: var(--border-thin);
+}
+
 .itemName {
+  flex: 1;
+  min-width: 0;
   font-size: 16px;
   letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editBtn {
+  width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-left: var(--border-thin);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  flex-shrink: 0;
+}
+
+.editBtn:active {
+  background: var(--color-bg-mute, #f3f3f3);
 }
 
 .backdrop {

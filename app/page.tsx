@@ -4,7 +4,9 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AppHeader } from "@/components/AppHeader/AppHeader";
+import { ProjectEditModal } from "@/components/ProjectEditModal/ProjectEditModal";
 import { UserMenu } from "@/components/UserMenu/UserMenu";
+import { DEFAULT_PRIMARY_COLOR } from "@/lib/theme";
 import type { Project } from "@/lib/types";
 import styles from "./page.module.css";
 
@@ -14,7 +16,10 @@ export default function ProjectsHomePage() {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const editingProject = projects.find((p) => p.id === editingId) ?? null;
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -58,6 +63,12 @@ export default function ProjectsHomePage() {
     }
   }, [newName]);
 
+  const handleProjectUpdated = useCallback((project: Project) => {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === project.id ? project : p)),
+    );
+  }, []);
+
   return (
     <main className={styles.app}>
       <AppHeader rightSlot={<UserMenu />} />
@@ -85,17 +96,45 @@ export default function ProjectsHomePage() {
             {projects.map((p) => (
               <li key={p.id} className={styles.item}>
                 <Link href={`/projects/${p.id}`} className={styles.itemLink}>
+                  <span className={styles.itemMark}>
+                    {p.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.logoUrl} alt="" />
+                    ) : (
+                      <span
+                        className={styles.itemSwatch}
+                        style={{
+                          background: p.primaryColor ?? DEFAULT_PRIMARY_COLOR,
+                        }}
+                      />
+                    )}
+                  </span>
                   <span className={styles.itemName}>{p.name}</span>
                   <Icon
                     icon="material-symbols:chevron-right-rounded"
                     width={22}
                   />
                 </Link>
+                <button
+                  className={styles.editBtn}
+                  type="button"
+                  onClick={() => setEditingId(p.id)}
+                  aria-label={`Edit ${p.name}`}
+                  title="Edit project"
+                >
+                  <Icon icon="material-symbols:edit-outline-rounded" width={18} />
+                </button>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      <ProjectEditModal
+        project={editingProject}
+        onClose={() => setEditingId(null)}
+        onUpdated={handleProjectUpdated}
+      />
 
       {modalOpen && (
         <div

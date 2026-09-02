@@ -54,6 +54,14 @@
   border-radius: 4px;
 }
 
+.logoImg {
+  height: 30px;
+  max-width: 120px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .logoTag {
   font-size: 10px;
   font-weight: 700;

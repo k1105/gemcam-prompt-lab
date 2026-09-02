@@ -1,0 +1,249 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.dialog {
+  background: var(--color-white);
+  border: var(--border-thick);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+}
+
+.dialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: var(--border-thin);
+}
+
+.dialogTitle {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.close {
+  background: transparent;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.dialogBody {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+}
+
+.input {
+  border: var(--border-thin);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: var(--color-white);
+  color: var(--color-ink);
+  min-width: 0;
+  flex: 1;
+}
+
+.hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-ink-mute);
+}
+
+.error {
+  background: var(--color-red);
+  color: var(--color-white);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+/* --- Preview --- */
+
+.preview {
+  border: var(--border-thin);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--color-yellow);
+  border-bottom: var(--border-thick);
+}
+
+.previewLogo {
+  height: 26px;
+  max-width: 100px;
+  object-fit: contain;
+}
+
+.previewMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--color-red);
+  color: var(--color-white);
+  font-size: 10px;
+  font-weight: 900;
+  border-radius: 4px;
+  font-family: var(--font-display);
+}
+
+.previewTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+
+.previewShutter {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--color-red);
+  border: 2px solid var(--color-ink);
+  flex-shrink: 0;
+}
+
+/* --- Color field --- */
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatch {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: var(--border-thin);
+  border-radius: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.swatch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.resetBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin);
+  border-radius: 999px;
+  background: var(--color-white);
+  color: var(--color-ink);
+  flex-shrink: 0;
+}
+
+/* --- Logo --- */
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoBox {
+  width: 72px;
+  height: 72px;
+  border: var(--border-thin);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* checkerboard so transparency is visible */
+  background:
+    repeating-conic-gradient(#e2e2e2 0% 25%, #ffffff 0% 50%) 0 0 / 12px 12px;
+  overflow: hidden;
+}
+
+.logoBox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logoPlaceholder {
+  color: var(--color-ink-mute);
+}
+
+.logoActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.textBtn {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-red);
+  padding: 4px 2px;
+  text-decoration: underline;
+}
+
+.dialogFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: var(--border-thin);
+}
